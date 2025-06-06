@@ -66,14 +66,14 @@ func Register(resolver *Resolver, constructors ...any) error {
 }
 
 func Resolve[T any](resolver *Resolver) (T, error) {
+	resolver.mutex.Lock()
+	defer resolver.mutex.Unlock()
+
 	var instance T
 	if err := resolver.container.Invoke(func(obj T) { instance = obj }); err != nil {
 		return instance, err
 	}
 
-	resolver.mutex.Lock()
 	resolver.resolved = true
-	resolver.mutex.Unlock()
-
 	return instance, nil
 }
